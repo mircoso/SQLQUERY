@@ -1,0 +1,31 @@
+begin tran
+
+DROP TABLE if exists #counts
+CREATE TABLE #counts
+(
+  table_name varchar(255),
+  row_count int
+)
+EXEC sp_MSForEachTable @command1='INSERT #counts (table_name, row_count) SELECT ''?'', COUNT(*) FROM ?'
+SELECT table_name, row_count FROM #counts ORDER BY table_name, row_count DESC
+delete FROM #counts 
+
+
+EXEC sp_MSForEachTable 'DISABLE TRIGGER ALL ON ?'
+GO
+EXEC sp_MSForEachTable 'ALTER TABLE ? NOCHECK CONSTRAINT ALL'
+GO
+EXEC sp_MSForEachTable 'SET QUOTED_IDENTIFIER ON; DELETE FROM ?'
+GO
+EXEC sp_MSForEachTable 'ALTER TABLE ? WITH CHECK CHECK CONSTRAINT ALL'
+GO
+EXEC sp_MSForEachTable 'ENABLE TRIGGER ALL ON ?'
+GO
+
+
+EXEC sp_MSForEachTable @command1='INSERT #counts (table_name, row_count) SELECT ''?'', COUNT(*) FROM ?'
+SELECT table_name, row_count FROM #counts ORDER BY table_name, row_count DESC
+delete FROM #counts 
+
+
+rollback
